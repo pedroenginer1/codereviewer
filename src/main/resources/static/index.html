@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Code Reviewer - Engenheiro Sênior de Bolso</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-screen font-sans flex flex-col justify-between">
+
+<header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur py-4 px-6">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <div class="flex items-center space-x-3">
+      <div class="bg-indigo-600 p-2 rounded-lg text-white font-bold text-xl">IA</div>
+      <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+        AI Code Reviewer
+      </h1>
+    </div>
+    <span class="text-xs bg-slate-800 px-3 py-1 rounded-full text-slate-400 border border-slate-700">v1.0.0 - Gemini 2.5 Flash</span>
+  </div>
+</header>
+
+<main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-6" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+
+  <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-sm font-semibold tracking-wider text-slate-400 uppercase">Cole seu código aqui</h2>
+      <button onclick="limparCampos()" class="text-xs text-slate-500 hover:text-slate-300 transition">Limpar</button>
+    </div>
+    <textarea id="codigoInput" class="flex-1 w-full h-[50vh] p-4 bg-slate-950 text-emerald-400 font-mono text-sm rounded-lg border border-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 resize-none" placeholder="// Digite ou cole seu código Java, JS, Python aqui para análise..."></textarea>
+    <button id="btnAnalisar" onclick="enviarCodigo()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/20">
+      <span id="btnTexto">Analisar Código</span>
+      <span id="spinner" class="hidden animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+    </button>
+  </div>
+
+  <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col space-y-4">
+    <h2 class="text-sm font-semibold tracking-wider text-slate-400 uppercase">Análise do Engenheiro Sênior</h2>
+    <div id="resultadoOutput" class="flex-1 w-full h-[58vh] p-4 bg-slate-950 text-slate-300 font-sans text-sm rounded-lg border border-slate-800 overflow-y-auto whitespace-pre-wrap">
+      <div class="text-slate-500 italic text-center pt-20">O relatório da IA aparecerá aqui assim que você enviar o código...</div>
+    </div>
+  </div>
+</main>
+
+<footer class="text-center py-4 text-xs text-slate-600 border-t border-slate-900">
+  Desenvolvido por Pedro - Estudante de Engenharia de Software
+</footer>
+
+<script>
+  async function enviarCodigo() {
+    const codigo = document.getElementById('codigoInput').value;
+    const btnAnalisar = document.getElementById('btnAnalisar');
+    const btnTexto = document.getElementById('btnTexto');
+    const spinner = document.getElementById('spinner');
+    const resultadoOutput = document.getElementById('resultadoOutput');
+
+    if (!codigo.trim()) {
+      alert('Por favor, cole algum código antes de analisar!');
+      return;
+    }
+
+    // Ativa estado de carregamento
+    btnAnalisar.disabled = true;
+    btnAnalisar.classList.add('opacity-75', 'cursor-not-allowed');
+    btnTexto.innerText = 'IA analisando...';
+    spinner.classList.remove('hidden');
+    resultadoOutput.innerHTML = '<div class="text-indigo-400 animate-pulse text-center pt-20 font-medium">Conectando ao Gemini... Processando arquitetura, Clean Code e segurança...</div>';
+
+    try {
+      // Faz a chamada exata para a URL do seu Controller Java
+      const resposta = await fetch('/api/review', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain'
+        },
+        body: codigo
+      });
+
+      if (!resposta.ok) {
+        throw new Error('Erro no servidor ao processar análise.');
+      }
+
+      const relatorioCompleto = await resposta.text();
+      // Cospe o relatório formatado na tela
+      resultadoOutput.textContent = relatorioCompleto;
+
+    } catch (error) {
+      resultadoOutput.innerHTML = `<div class="text-red-400 font-medium p-4 bg-red-950/30 border border-red-900 rounded-lg">❌ Erro: ${error.message}<br><br>Verifique se o seu servidor Spring Boot continua rodando no IntelliJ!</div>`;
+    } finally {
+      // Desativa estado de carregamento
+      btnAnalisar.disabled = false;
+      btnAnalisar.classList.remove('opacity-75', 'cursor-not-allowed');
+      btnTexto.innerText = 'Analisar Código';
+      spinner.classList.add('hidden');
+    }
+  }
+
+  function limparCampos() {
+    document.getElementById('codigoInput').value = '';
+    document.getElementById('resultadoOutput').innerHTML = '<div class="text-slate-500 italic text-center pt-20">O relatório da IA aparecerá aqui assim que você enviar o código...</div>';
+  }
+</script>
+</body>
+</html>
